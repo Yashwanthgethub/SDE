@@ -62,7 +62,7 @@ export const searchDocuments = async (query) => {
 };
 
 export const getDocumentById = async (id) => {
-  const res = await axios.get(`${API_URL}/${id}`, getAuthHeaders());
+  const res = await axios.get(`${API_URL}/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
   return res.data;
 };
 

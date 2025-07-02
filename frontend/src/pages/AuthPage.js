@@ -5,8 +5,10 @@ import {
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
+import GoogleIcon from '@mui/icons-material/Google';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { getMe } from '../services/authService';
 
 const AuthPage = () => {
   const [tab, setTab] = useState(0);
@@ -17,7 +19,7 @@ const AuthPage = () => {
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirm, setRegisterConfirm] = useState('');
   const [error, setError] = useState('');
-  const { login, register } = useAuth();
+  const { login, register, setUser, setToken } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,9 +27,15 @@ const AuthPage = () => {
     const token = params.get('token');
     if (token) {
       localStorage.setItem('token', token);
-      navigate('/dashboard');
+      setToken(token);
+      getMe().then(user => {
+        setUser(user);
+        navigate('/dashboard');
+      }).catch(() => {
+        navigate('/dashboard');
+      });
     }
-  }, [navigate]);
+  }, [navigate, setUser, setToken]);
 
   const handleTabChange = (e, newValue) => {
     setTab(newValue);
@@ -194,12 +202,26 @@ const AuthPage = () => {
           </form>
         )}
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
+          fullWidth
+          startIcon={<GoogleIcon sx={{ color: '#EA4335' }} />}
           onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
-          sx={{ mt: 2 }}
+          sx={{
+            mt: 2,
+            backgroundColor: '#fff',
+            color: 'rgba(0,0,0,0.54)',
+            borderColor: '#ddd',
+            textTransform: 'none',
+            fontWeight: 500,
+            fontSize: 16,
+            boxShadow: '0 1px 2px rgba(60,64,67,.08)',
+            '&:hover': {
+              backgroundColor: '#f7f7f7',
+              borderColor: '#ccc',
+            },
+          }}
         >
-          Login with Google
+          Sign in with Google
         </Button>
       </Paper>
     </Box>

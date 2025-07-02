@@ -75,7 +75,7 @@ exports.getDocumentById = async (req, res) => {
     if (
       doc.visibility !== 'public' &&
       doc.author._id.toString() !== req.user.id &&
-      !doc.collaborators.includes(req.user.id)
+      !doc.collaborators.some(c => c.user.toString() === req.user.id)
     ) {
       return res.status(403).json({ message: 'Access denied' });
     }

@@ -14,6 +14,8 @@ import TrashPage from './pages/TrashPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import NewDocumentPage from './pages/NewDocumentPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
+import GoogleAuthHandler from './pages/GoogleAuthHandler';
+import EditDocumentPage from './pages/EditDocumentPage';
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<AuthPage />} />
+          <Route path="/auth/google/success" element={<GoogleAuthHandler />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route element={<ProtectedRoute />}>
@@ -33,6 +36,7 @@ function App() {
             <Route path="/trash" element={<TrashPage />} />
             <Route path="/settings" element={<AccountSettingsPage />} />
             <Route path="/document/:id" element={<DocumentDetailPage />} />
+            <Route path="/edit/:id" element={<EditDocumentPage />} />
           </Route>
         </Routes>
       </Router>

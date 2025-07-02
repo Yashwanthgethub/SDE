@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Card, CardContent, Typography, CircularProgress, IconButton, Chip, Tooltip, Menu, MenuItem } from '@mui/material';
-import { getMyDocuments, deleteDocument } from '../services/documentService';
+import { getMyDocuments, deleteDocument, addCollaborator } from '../services/documentService';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PublicIcon from '@mui/icons-material/Public';
 import LockIcon from '@mui/icons-material/Lock';
@@ -10,6 +10,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
 
 const MyDocumentsPage = () => {
   const [documents, setDocuments] = useState([]);
@@ -19,6 +26,12 @@ const MyDocumentsPage = () => {
   const { user } = useAuth();
   const [processingId, setProcessingId] = useState(null);
   const navigate = useNavigate();
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareDocId, setShareDocId] = useState(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareSuccess, setShareSuccess] = useState('');
+  const [shareError, setShareError] = useState('');
+  const [shareLoading, setShareLoading] = useState(false);
 
   const fetchDocs = async () => {
     setLoading(true);
@@ -54,6 +67,21 @@ const MyDocumentsPage = () => {
       // Optionally handle error
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleShare = async () => {
+    setShareLoading(true);
+    setShareSuccess('');
+    setShareError('');
+    try {
+      await addCollaborator(shareDocId, shareEmail, 'edit');
+      setShareSuccess('Document shared successfully!');
+      setShareEmail('');
+    } catch (err) {
+      setShareError(err?.response?.data?.message || 'Failed to share document');
+    } finally {
+      setShareLoading(false);
     }
   };
 
@@ -95,9 +123,9 @@ const MyDocumentsPage = () => {
                       <MoreVertIcon />
                     </IconButton>
                     <Menu anchorEl={anchorEl} open={menuDocId === doc._id} onClose={handleMenuClose}>
-                      <MenuItem onClick={handleMenuClose}>View</MenuItem>
+                      <MenuItem onClick={() => { navigate(`/document/${doc._id}`); handleMenuClose(); }}>View</MenuItem>
                       <MenuItem onClick={() => { navigate(`/edit/${doc._id}`); handleMenuClose(); }}>Edit</MenuItem>
-                      <MenuItem onClick={handleMenuClose}>Share</MenuItem>
+                      <MenuItem onClick={() => { setShareOpen(true); setShareDocId(doc._id); handleMenuClose(); }}>Share</MenuItem>
                       <MenuItem onClick={() => { handleDelete(doc._id); handleMenuClose(); }} sx={{ color: 'error.main' }} disabled={processingId === doc._id}>
                         {processingId === doc._id ? <CircularProgress size={18} /> : 'Delete'}
                       </MenuItem>
@@ -120,6 +148,26 @@ const MyDocumentsPage = () => {
           ))
         )}
       </Grid>
+      <Dialog open={shareOpen} onClose={() => setShareOpen(false)}>
+        <DialogTitle>Share Document</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="User Email"
+            fullWidth
+            value={shareEmail}
+            onChange={e => setShareEmail(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          {shareSuccess && <Alert severity="success" sx={{ mt: 2 }}>{shareSuccess}</Alert>}
+          {shareError && <Alert severity="error" sx={{ mt: 2 }}>{shareError}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShareOpen(false)}>Cancel</Button>
+          <Button onClick={handleShare} variant="contained" disabled={shareLoading || !shareEmail}>
+            {shareLoading ? 'Sharing...' : 'Share'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

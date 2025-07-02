@@ -26,4 +26,6 @@ router.get('/google/callback',
   }
 );
 
+router.get('/users', auth, authController.listUsers);
+
 module.exports = router; 

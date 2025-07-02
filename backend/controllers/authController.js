@@ -168,4 +168,13 @@ exports.changePassword = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+exports.listUsers = async (req, res) => {
+  try {
+    const users = await User.find({}, 'id name email');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 }; 
